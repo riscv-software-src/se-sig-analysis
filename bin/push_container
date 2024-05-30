@@ -1,0 +1,13 @@
+#!/bin/bash
+
+ROOT=$(realpath $(dirname $(dirname $BASH_SOURCE[0])))
+
+if [ ! -e ${ROOT}/.dockerhub.token ]; then
+  echo "To push a new container, you must put your Docker Hub Access Token (With write premission to riscvintl/se-sig-analysis) to $(ROOT)/.dockerhub.token" 1>&2
+  exit 1
+fi
+
+cat $(ROOT)/.dockerhub.token | signularity remote login -u dhowerqc --password-stdin oras://docker.io
+cat $(ROOT)/.dockerhub.token | signularity remote login -u dhowerqc --password-stdin oras://index.docker.io
+
+singularity push .signularity/image.sif oras://docker.io/riscvintl/se-sig-analysis:latest

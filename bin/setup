@@ -1,0 +1,47 @@
+#!/bin/bash
+
+ROOT=$(realpath $(dirname $(dirname $BASH_SOURCE[0])))
+
+# make container home directory (~)
+if [ ! -d "${ROOT}/.home" ]; then
+  mkdir -p ${ROOT}/.home
+fi
+
+# make sure we have singularity
+which singularity 2>&1 > /dev/null
+if [ $? -ne 0 ]; then
+  echo "Singularity is not installed (or is not in path)" 1>&2
+  exit 1
+fi
+
+# get the container image
+if [ ! -e "${ROOT}/.singularity/image.sif" ]; then
+  echo "Fetching container..."
+  if [ ! -d "${ROOT}/.singularity" ]; then
+    mkdir -p ${ROOT}/.singularity
+  fi
+  singularity pull --disable-cache ${ROOT}/.singularity/image.sif oras://docker.io/riscvintl/se-sig-analysis:latest
+fi
+
+RUBY="singularity run --app ruby --home ${ROOT}/.home ${ROOT}/.singularity/image.sif"
+BUNDLE="singularity run --app bundle --home ${ROOT}/.home ${ROOT}/.singularity/image.sif"
+PYTHON3="singularity run --app python3 --home ${ROOT}/.home ${ROOT}/.singularity/image.sif"
+PIP3="singularity run --app pip3 --home ${ROOT}/.home ${ROOT}/.singularity/image.sif"
+CMAKE="singularity run --app cmake --home ${ROOT}/.home ${ROOT}/.singularity/image.sif"
+DTC="singularity run --app dtc --home ${ROOT}/.home ${ROOT}/.singularity/image.sif"
+
+# install bundle into container home
+if [ ! -e "${ROOT}/.home/.gems" ]; then
+  OLDDIR=$PWD
+  cd $ROOT
+  $BUNDLE config set --local path ${ROOT}/.home/.gems
+  $BUNDLE install  
+  cd $OLDDIR
+fi
+
+export RUBY="$RUBY"
+export BUNDLE="$BUNDLE"
+export PYTHON3="$PYTHON3"
+export PIP3="$PIP3"
+export CMAKE="$CMAKE"
+export DTC="$DTC"

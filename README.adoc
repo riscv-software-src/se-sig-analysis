@@ -1,0 +1,56 @@
+= RISC-V International Scalar Efficency SIG Workspace
+
+== Dependencies
+
+The only dependency is the https://sylabs.io/singularity[Singularity container system].
+
+Packages for recent Ubuntu and RHEL distributions are provided on https://github.com/sylabs/singularity/releases/tag/v4.1.3[GitHub].
+
+For example, to install on Ubuntu Focal (18.04):
+
+.Install on Debian/Ubuntu
+[source,bash]
+----
+wget https://github.com/sylabs/singularity/releases/download/v4.1.3/singularity-ce_4.1.3-focal_amd64.deb
+sudo dpkg -i singularity-ce_4.1.3-focal_amd64.deb
+----
+
+If you use another system, you will need to install from source using the https://docs.sylabs.io/guides/4.1/admin-guide/installation.html[instructions].
+
+[IMPORTANT]
+You need to have fakeroot enabled. Once singularity is installed, run the following: `sudo singularity config fakeroot --add `whoami``
+
+== Setup
+
+Everything is run out of an Ubuntu 24.04 container. You will need to set it up:
+
+.One-time setup
+[source,bash]
+----
+# OPTIONAL, only if you need to access a mirror of Docker hub for some reason
+# export DOCKER_HUB_URL=docker-registry.qualcomm.com
+./bin/setup
+----
+
+Grab a cup of :coffee:; this will build/install cross-compiling toolchains for gcc and LLVM, so it will take a while. It also requires many GBs of disk space (temporarily), so make sure you have plenty of space.
+
+== Tasks
+
+Tasks are managed by https://github.com/ruby/rake[rake], a Makefile-like system for https://www.ruby-lang.org[Ruby]. To see a list of known tasks, run:
+
+.Print all tasks
+[source,bash]
+----
+./bin/rake --tasks
+----
+
+[NOTE]
+Do not use the rake installed in your host (_e.g._, at `/usr/bin/rake`, or just `rake`). The version version in `./bin/rake` will run in the container, which is necessary to ensure everything works as planned.
+
+To build all benchmarks:
+
+.Build benchmarks
+[source,bash]
+----
+./bin/rake build:all
+----

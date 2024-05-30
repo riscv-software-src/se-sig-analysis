@@ -1,0 +1,97 @@
+---
+:rtos32_llvm:
+  :class: :rtos
+  :xlen: 32
+  :toolchain: :llvm
+  :priority: :size
+  :path: "/opt/riscv/gcc/riscv64-unknown-elf/bin"
+  :cc: "/usr/bin/clang-18"
+  :cxx: "/usr/bin/clang++-18"
+  :cflags: "-target riscv32-unknown-elf
+    -march=rv32ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt
+    -mabi=ilp32 -Os -emit-llvm
+    --sysroot=/opt/riscv/gcc/riscv64-unknown-elf"
+  :ldflags: "-target riscv32-unknown-elf -lnosys -march=rv32ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt
+    -mabi=ilp32 -flto -fuse-ld=lld
+    -L/opt/riscv/gcc/riscv64-unknown-elf/lib/rv32ima_zca_zcb_zcmp_zba_zbb_zbs/ilp32
+    -L/opt/riscv/gcc/lib/gcc/riscv64-unknown-elf/14.1.0/rv32ima_zca_zcb_zcmp_zba_zbb_zbs/ilp32"
+:rtos64_llvm:
+  :class: :rtos
+  :xlen: 64
+  :toolchain: :llvm
+  :priority: :size
+  :path: "/opt/riscv/gcc/riscv64-unknown-elf/bin"
+  :cc: "/usr/bin/clang-18"
+  :cxx: "/usr/bin/clang++-18"
+  :cflags: "-target riscv64-unknown-elf -march=rv64ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt
+    -mbabi=lp64 -Os -emit-llvm --sysroot=/opt/riscv/rtos32-gcc/riscv32-unknown-elf"
+  :ldflags: "-target riscv64-unknown-elf -lnosys -mabi=lp64 -flto -fuse-ld=lld --sysroot=/opt/riscv/rtos32-gcc/riscv32-unknown-elf"
+:rtos32_gcc:
+  :class: :rtos
+  :xlen: 32
+  :toolchain: :gcc
+  :priority: :size
+  :path: "/opt/riscv/gcc/riscv64-unknown-elf/bin"
+  :cc: "/opt/riscv/gcc/bin/riscv64-unknown-elf-gcc"
+  :cxx: "/opt/riscv/gcc/bin/riscv64-unknown-elf-g++"
+  :cflags: "-march=rv32ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt -mabi=ilp32 -Os"
+  :ldflags: "-march=rv32ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt -mabi=ilp32"
+:rtos64_gcc:
+  :class: :rtos
+  :xlen: 64
+  :toolchain: :gcc
+  :priority: :size
+  :path: "/opt/riscv/gcc/riscv64-unknown-elf/bin"
+  :cc: "/opt/riscv/gcc/bin/riscv64-unknown-elf-gcc"
+  :cxx: "/opt/riscv/gcc/bin/riscv64-unknown-elf-g++"
+  :fc: "/opt/riscv/gcc/bin/riscv64-unknown-elf-gfortran"
+  :cflags: "-march=rv64ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt -mbabi=lp64 -Os -emit-llvm"
+  :ldflags: "-march=rv64ima_zba_zbb_zbs_zca_zcb_zcmp_zcmt -mabi=lp64 -flto -fuse-ld=gold"
+:linux32_gcc:
+  :class: :linux
+  :xlen: 32
+  :toolchain: :gcc
+  :priority: :size
+  :triple: riscv32-unknown-linux-gnu
+  :path: "/opt/riscv/gcc/riscv64-unknown-linux-gnu/bin"
+  :cc: "/opt/riscv/gcc/bin/riscv64-unknown-linux-gnu-gcc"
+  :cxx: "/opt/riscv/gcc/bin/riscv64-unknown-linux-gnu-g++"
+  :fc: "/opt/riscv/gcc/bin/riscv64-unknown-linux-gnu-gfortran"
+  :cflags: "-march=rv32ima_zba_zbb_zbs_zca_zcb_zcmp -mabi=ilp32 -Os"
+  :ldflags: "-march=rv32ima_zba_zbb_zbs_zca_zcb_zcmp -mabi=ilp32 "
+:linux64_app_gcc:
+  :class: :linux
+  :xlen: 64
+  :toolchain: :gcc
+  :priority: :speed
+  :triple: riscv64-unknown-linux-gnu
+  :path: "/opt/riscv/gcc/riscv64-unknown-linux-gnu/bin"
+  :cc: "/opt/riscv/gcc/bin/riscv64-unknown-linux-gnu-gcc"
+  :cxx: "/opt/riscv/gcc/bin/riscv64-unknown-linux-gnu-g++"
+  :fc: "/opt/riscv/gcc/bin/riscv64-unknown-linux-gnu-gfortran"
+  :cflags: "-march=rv64gcv_zba_zbb_zbs_zca_zcb -mabi=lp64d -Ofast"
+  :ldflags: "-mabi=lp64d -fuse-ld=gold -flto"
+:linux64_app_llvm:
+  :class: :linux
+  :xlen: 64
+  :toolchain: :llvm
+  :priority: :speed
+  :triple: riscv64-unknown-linux-gnu
+  :path: "/opt/riscv/gcc/riscv64-unknown-linux-gnu/bin"
+  :cc: "/usr/bin/clang-18"
+  :cxx: "/usr/bin/clang++-18"
+  :cflags: "-march=rv64gcv_zba_zbb_zbs_zca_zcb -mabi=lp64d -Ofast"
+  :ldflags: "-mabi=lp64d -fuse-ld=gold -flto"
+:android64_llvm:
+  :class: :android
+  :xlen: 64
+  :toolchain: :llvm
+  :priority: :speed
+  :triple: riscv64-linux-android
+  :path: "build/aosp/prebuilts/clang/host/linux-x86/clang-r522817/bin"
+  :cc: "build/aosp/prebuilts/clang/host/linux-x86/clang-r522817/bin/clang"
+  :cxx: "build/aosp/prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++"
+  :cflags: "-march=rv64gcv_zba_zbb_zbs_zcb -mno-strict-align -mno-implicit-float -mllvm
+    -jump-is-expensive=false -Werror=implicit-function-declaration"
+  :ldflags: "-march=rv64gcv_zba_zbb_zbs_zcb -Wl,-mllvm -Wl,-jump-is-expensive=false
+    -Wl,-z,max-page-size=4096"
