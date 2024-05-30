@@ -1020,6 +1020,117 @@ def zilsd_cld?(inst_history, options)
   end
 end
 
+def zilsd_sd?(inst_history, options)
+  return false unless options[:zilsd]
+
+  # two sequential load instructions
+  return false unless inst_history[0].is_store && inst_history[1].is_store
+
+  # same base on stores
+  return false unless inst_history[0].rs1 == inst_history[1].rs1
+
+  # same datatype, == word
+  return false unless (inst_history[0].st_datatype == :w) && (inst_history[1].st_datatype == :w)
+
+  # sequential addresses ( in either order )
+  return false unless ((inst_history[0].st_offset + inst_history[0].ldst_size == inst_history[1].st_offset) \
+  || (inst_history[1].st_offset + inst_history[1].ldst_size == inst_history[0].st_offset))
+
+  # fits in offset
+  return false unless ((inst_history[0].st_offset <= 2047) && (inst_history[0].st_offset > -2048))
+
+  # this sequence matches. now just determine if the replacement can be compressed
+  if ((inst_history[0].rs1 == 2) && # stack pointer relative
+      Instruction::COMP_REGS.any?(inst_history[0].rs1) && # fits in rs1'
+      Instruction::COMP_REGS.any?(inst_history[0].rs2) && Instruction::COMP_REGS.any?(inst_history[0].rs1 + 1) && # fits in rs2'
+      (inst_history[0].st_offset >= 0) && (inst_history[0].st_offset < 508) && (inst_history[0].st_offset % 8 == 0)) # fits in offset
+    # c.sdsp
+    return false
+  elsif (Instruction::COMP_REGS.any?(inst_history[0].rs2) && Instruction::COMP_REGS.any?(inst_history[0].rs2 + 1) && # fits in rs1'
+         Instruction::COMP_REGS.any?(inst_history[0].rs1) && # fits in rs1'
+         (inst_history[0].st_offset >= 0) && (inst_history[0].st_offset < 256)) # fits in offset
+    # c.sd
+    return false
+  else
+    # sd
+    return 2
+  end
+end
+
+def zilsd_csdsp?(inst_history, options)
+  return false unless options[:zilsd]
+
+  # two sequential load instructions
+  return false unless inst_history[0].is_store && inst_history[1].is_store
+
+  # same base on stores
+  return false unless inst_history[0].rs1 == inst_history[1].rs1
+
+  # same datatype, == word
+  return false unless (inst_history[0].st_datatype == :w) && (inst_history[1].st_datatype == :w)
+
+  # sequential addresses ( in either order )
+  return false unless ((inst_history[0].st_offset + inst_history[0].ldst_size == inst_history[1].st_offset) \
+  || (inst_history[1].st_offset + inst_history[1].ldst_size == inst_history[0].st_offset))
+
+  # fits in offset
+  return false unless ((inst_history[0].st_offset <= 2047) && (inst_history[0].st_offset > -2048))
+
+  # this sequence matches. now just determine if the replacement can be compressed
+  if ((inst_history[0].rs1 == 2) && # stack pointer relative
+      Instruction::COMP_REGS.any?(inst_history[0].rs1) && # fits in rs1'
+      Instruction::COMP_REGS.any?(inst_history[0].rs2) && Instruction::COMP_REGS.any?(inst_history[0].rs1 + 1) && # fits in rs2'
+      (inst_history[0].st_offset >= 0) && (inst_history[0].st_offset < 508) && (inst_history[0].st_offset % 8 == 0)) # fits in offset
+    # c.sdsp
+    return true
+  elsif (Instruction::COMP_REGS.any?(inst_history[0].rs2) && Instruction::COMP_REGS.any?(inst_history[0].rs2 + 1) && # fits in rs1'
+         Instruction::COMP_REGS.any?(inst_history[0].rs1) && # fits in rs1'
+         (inst_history[0].st_offset >= 0) && (inst_history[0].st_offset < 256)) # fits in offset
+    # c.sd
+    return false
+  else
+    # sd
+    return false
+  end
+end
+
+def zilsd_csd?(inst_history, options)
+  return false unless options[:zilsd]
+
+  # two sequential load instructions
+  return false unless inst_history[0].is_store && inst_history[1].is_store
+
+  # same base on stores
+  return false unless inst_history[0].rs1 == inst_history[1].rs1
+
+  # same datatype, == word
+  return false unless (inst_history[0].st_datatype == :w) && (inst_history[1].st_datatype == :w)
+
+  # sequential addresses ( in either order )
+  return false unless ((inst_history[0].st_offset + inst_history[0].ldst_size == inst_history[1].st_offset) \
+  || (inst_history[1].st_offset + inst_history[1].ldst_size == inst_history[0].st_offset))
+
+  # fits in offset
+  return false unless ((inst_history[0].st_offset <= 2047) && (inst_history[0].st_offset > -2048))
+
+  # this sequence matches. now just determine if the replacement can be compressed
+  if ((inst_history[0].rs1 == 2) && # stack pointer relative
+      Instruction::COMP_REGS.any?(inst_history[0].rs1) && # fits in rs1'
+      Instruction::COMP_REGS.any?(inst_history[0].rs2) && Instruction::COMP_REGS.any?(inst_history[0].rs1 + 1) && # fits in rs2'
+      (inst_history[0].st_offset >= 0) && (inst_history[0].st_offset < 508) && (inst_history[0].st_offset % 8 == 0)) # fits in offset
+    # c.sdsp
+    return true
+  elsif (Instruction::COMP_REGS.any?(inst_history[0].rs2) && Instruction::COMP_REGS.any?(inst_history[0].rs2 + 1) && # fits in rs1'
+         Instruction::COMP_REGS.any?(inst_history[0].rs1) && # fits in rs1'
+         (inst_history[0].st_offset >= 0) && (inst_history[0].st_offset < 256)) # fits in offset
+    # c.sd
+    return 2
+  else
+    # sd
+    return false
+  end
+end
+
 def zics_ld_pair?(inst_history, options)
   return false unless options[:zics_ldstp] == true
 
@@ -1581,6 +1692,30 @@ while inst_history.idx < encodings.size
     stats[:est_size] += 2
   elsif (n = zilsd_cldsp?(inst_history, options))
     stats[:zilsd][:cldsp] += 1
+
+    # since this is consuming the current AND next instruction, increment the index by 2
+    # so we don't pull in the same load twice
+    inst_history.idx += 2
+    stats[:est_inst_cnt] += 1
+    stats[:est_size] += 2
+  elsif (n = zilsd_sd?(inst_history, options))
+    stats[:zilsd][:sd] += 1
+
+    # since this is consuming the current AND next instruction, increment the index by 2
+    # so we don't pull in the same load twice
+    inst_history.idx += 2
+    stats[:est_inst_cnt] += 1
+    stats[:est_size] += 4
+  elsif (n = zilsd_csd?(inst_history, options))
+    stats[:zilsd][:csd] += 1
+
+    # since this is consuming the current AND next instruction, increment the index by 2
+    # so we don't pull in the same load twice
+    inst_history.idx += 2
+    stats[:est_inst_cnt] += 1
+    stats[:est_size] += 2
+  elsif (n = zilsd_csdsp?(inst_history, options))
+    stats[:zilsd][:csdsp] += 1
 
     # since this is consuming the current AND next instruction, increment the index by 2
     # so we don't pull in the same load twice

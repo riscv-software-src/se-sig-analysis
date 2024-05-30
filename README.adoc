@@ -18,7 +18,7 @@ sudo dpkg -i singularity-ce_4.1.3-focal_amd64.deb
 If you use another system, you will need to install from source using the https://docs.sylabs.io/guides/4.1/admin-guide/installation.html[instructions].
 
 [IMPORTANT]
-You need to have fakeroot enabled. Once singularity is installed, run the following: `sudo singularity config fakeroot --add `whoami``
+To build the container (not just pull it), you need to have fakeroot enabled. Once singularity is installed, run the following: `sudo singularity config fakeroot --add `whoami``
 
 == Setup
 
@@ -27,12 +27,10 @@ Everything is run out of an Ubuntu 24.04 container. You will need to set it up:
 .One-time setup
 [source,bash]
 ----
-# OPTIONAL, only if you need to access a mirror of Docker hub for some reason
-# export DOCKER_HUB_URL=docker-registry.qualcomm.com
 ./bin/setup
 ----
 
-Grab a cup of :coffee:; this will build/install cross-compiling toolchains for gcc and LLVM, so it will take a while. It also requires many GBs of disk space (temporarily), so make sure you have plenty of space.
+This will pull the container into your filesystem.
 
 == Tasks
 

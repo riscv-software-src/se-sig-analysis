@@ -63,3 +63,10 @@ namespace :manifest do
     puts File.read "#{$root}/suites/speccpu2017/manifest.yml"
   end
 end
+
+namespace :clean do
+  task :speccpu2017 do
+    sh "#{$root}/build/speccpu2017/bin/runcpu --config=#{$root}/suites/speccpu2017/linux64_app_gcc.cfg --action=clean intrate fprate"
+    sh "#{$root}/build/speccpu2017/bin/runcpu --config=#{$root}/suites/speccpu2017/linux64_app_llvm.cfg --action=clean intrate fprate"
+  end
+end
